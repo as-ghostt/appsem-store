@@ -53,3 +53,12 @@ No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
 - **Métricas seguras todavía NO activadas en producción:** faltan los secrets de Cloudflare `FIREBASE_SERVICE_ACCOUNT_JSON`, `METRICS_HMAC_SECRET` y `TURNSTILE_SECRET_KEY`, además de la site key de Turnstile con hostname nuevo. `METRICS_BACKEND_ENABLED=true`, `VITE_METRICS_BACKEND=server` y `VITE_TURNSTILE_SITE_KEY` deben configurarse únicamente después de validar la ruta de lectura, permisos y POST con un entorno de prueba.
 - La ruta Cloudflare retorna rechazo controlado cuando no está configurada. No se han ejecutado escrituras contra Firebase real.
 - Reglas Firestore, identidad de Firebase y colecciones preservadas; fases de auditoría aún abiertas. Vercel sigue disponible como respaldo mientras no se verifiquen las funciones dependientes de credenciales.
+
+
+## Variables de seguridad desplegadas en cuenta CEO
+- Turnstile: creado el widget `AppsEM Store — interacciones verificadas`, autorizado para `appsem-store.pages.dev`.
+- `TURNSTILE_SECRET_KEY`: guardado cifrado en Cloudflare Pages.
+- `VITE_TURNSTILE_SITE_KEY`: guardado como variable pública de compilación (no secreto).
+- `METRICS_HMAC_SECRET`: generado criptográficamente y guardado cifrado en Cloudflare Pages.
+- **Falta `FIREBASE_SERVICE_ACCOUNT_JSON`**, credencial de Google/Firebase que no está disponible en los conectores. No activar `METRICS_BACKEND_ENABLED=true` ni `VITE_METRICS_BACKEND=server` sin esta credencial, prueba de reglas y verificación Turnstile.
+- Este commit vuelve a compilar la tienda para incorporar la site key sin alterar la funcionalidad actualmente activa.
