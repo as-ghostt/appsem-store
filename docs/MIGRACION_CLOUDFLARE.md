@@ -35,3 +35,11 @@ No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
 - Cloudflare conectado: `ceo.developer.appsem@gmail.com`, cuenta `0bdec89d523124e6346040488c71276a`.
 - Intento de crear `appsem-store-admin` con GitHub en esta **cuenta CEO**: Cloudflare devolvió HTTP 401, código `8000011` (problema interno de instalación Git). La creación no se completó.
 - La migración no debe utilizar cuentas diferentes de CEO. No mover tráfico ni retirar Vercel hasta validar un despliegue operativo.
+
+## Reintento de conexión CEO — 10/11/2026
+- GitHub y Cloudflare conectados a las cuentas autorizadas por CEO.
+- Cloudflare Pages creó correctamente el proyecto `appsem-store`.
+- Proyecto enlazado al repositorio `as-ghostt/appsem-store`, rama `main` con despliegue automático habilitado.
+- URL asignada: `https://appsem-store.pages.dev`.
+- Este commit inicia una compilación de prueba mediante integración GitHub; la creación del proyecto no prueba aún funcionamiento de la web.
+- Vercel continúa intacto hasta confirmar un despliegue funcional y las verificaciones de seguridad.
