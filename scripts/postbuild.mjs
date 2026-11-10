@@ -2,7 +2,7 @@ import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 // En Cloudflare el dominio canónico debe configurarse explícitamente antes de publicar.
-const SITE_URL = (process.env.PUBLIC_SITE_ORIGIN || "https://appsem-store.vercel.app").replace(/[/]$/, "");
+const SITE_URL = (process.env.PUBLIC_SITE_ORIGIN || "https://appsem-store.pages.dev").replace(/[/]$/, "");
 if (process.env.CF_PAGES === "1" && !process.env.PUBLIC_SITE_ORIGIN) {
   throw new Error("PUBLIC_SITE_ORIGIN es obligatorio para Cloudflare Pages.");
 }

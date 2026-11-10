@@ -246,7 +246,7 @@ export default function AppDetails() {
   const directDownloadUrl = app.downloadUrl || app.apkUrl || app.playStoreUrl;
   const categoryLabel = categoryMap[app.categoryKey] || app.category || "App";
   const description = app.seoDescription || app.shortDescription || app.fullDescription || `Descubre ${app.title} en Appsem Store.`;
-  const appUrl = `${(import.meta.env.VITE_PUBLIC_SITE_ORIGIN || 'https://appsem-store.vercel.app').replace(/[/]$/, '')}/app/${app.slug}`;
+  const appUrl = `${(import.meta.env.VITE_PUBLIC_SITE_ORIGIN || 'https://appsem-store.pages.dev').replace(/[/]$/, '')}/app/${app.slug}`;
   const privacyPolicyUrl = app.privacyPolicyUrl || "";
   const termsUrl = app.termsUrl || "";
   const legalNoticeUrl = app.legalNoticeUrl || "";
