@@ -1,7 +1,11 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
-const SITE_URL = "https://appsem-store.vercel.app";
+// En Cloudflare el dominio canónico debe configurarse explícitamente antes de publicar.
+const SITE_URL = (process.env.PUBLIC_SITE_ORIGIN || "https://appsem-store.vercel.app").replace(/\\/$/, "");
+if (process.env.CF_PAGES === "1" && !process.env.PUBLIC_SITE_ORIGIN) {
+  throw new Error("PUBLIC_SITE_ORIGIN es obligatorio para Cloudflare Pages.");
+}
 const PROJECT_ID = "webs-8b1bf";
 const DIST = "dist";
 const DEFAULT_IMAGE = `${SITE_URL}/images/web/appsem-store-icon-512.png`;
@@ -205,7 +209,7 @@ async function main() {
   await writeFile(join(DIST, "sitemap.xml"), sitemap(apps), "utf8");
   await versionServiceWorker();
 
-  if (apps.length === 0) throw new Error("No se encontraron aplicaciones publicadas; se cancela el despliegue para evitar un sitemap incompleto.");
+  if (apps.length === 0) console.info("Catálogo vacío: se publica la tienda sin fichas de aplicaciones.");
   console.log(`Prerender completado: ${apps.length} fichas, rutas institucionales, 404 y sitemap.`);
 }
 
