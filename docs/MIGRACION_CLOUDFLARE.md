@@ -3,8 +3,8 @@
 Estado: **preparación parcial; despliegue NO realizado**.
 
 ## GitHub y cuenta
-- Repositorio: `eler30mr-star/appsem-store`; rama `main`.
-- La cuenta Cloudflare vinculada al propietario está vacía de Pages y Workers en la comprobación realizada.
+- Repositorio: `as-ghostt/appsem-store`; rama `main`.
+- La cuenta Cloudflare CEO `ceo.developer.appsem@gmail.com` no tenía proyectos Pages ni Workers en la revisión.
 - Cloudflare rechazó conectar el primer proyecto Admin a GitHub por error de instalación Git (HTTP 401, código `8000011`). No se han publicado proyectos.
 - Vercel conserva la producción.
 
@@ -29,3 +29,9 @@ Estado: **preparación parcial; despliegue NO realizado**.
 - No borrar Vercel hasta que el nuevo dominio y funciones estén confirmados.
 
 No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
+
+## Verificación de cuenta CEO (10/11/2026)
+- GitHub conectado: `as-ghostt`, acceso administrador a ambos repositorios.
+- Cloudflare conectado: `ceo.developer.appsem@gmail.com`, cuenta `0bdec89d523124e6346040488c71276a`.
+- Intento de crear `appsem-store-admin` con GitHub en esta **cuenta CEO**: Cloudflare devolvió HTTP 401, código `8000011` (problema interno de instalación Git). La creación no se completó.
+- La migración no debe utilizar cuentas diferentes de CEO. No mover tráfico ni retirar Vercel hasta validar un despliegue operativo.
