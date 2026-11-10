@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 const SITE_NAME = "Appsem Store";
-const SITE_URL = "https://appsem-store.vercel.app";
+const SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_ORIGIN || "https://appsem-store.vercel.app").replace(/[/]$/, "");
 const DEFAULT_DESCRIPTION = "Descubre aplicaciones oficiales desarrolladas por AppsMart Technology en Appsem Store.";
 const DEFAULT_IMAGE = `${SITE_URL}/images/web/appsem-store-icon-512.png`;
 
