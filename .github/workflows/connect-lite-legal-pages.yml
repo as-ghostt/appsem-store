@@ -33,7 +33,7 @@ jobs:
               Path("public/apps/biblia-universal-lite/reporte-de-seguridad-y-vulnerabilidades/index.html"),
           ]
 
-          base = "https://appsem-store.vercel.app/apps/biblia-universal-lite"
+          base = "https://appsem-store.pages.dev/apps/biblia-universal-lite"
 
           replacements = {
               'href="index.html"': f'href="{base}/politicas-de-privacidad/"',
@@ -71,5 +71,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/apps/biblia-universal-lite
-          git commit -m "Update Lite legal navigation to Vercel URLs"
+          git commit -m "Update Lite legal navigation to Cloudflare URLs"
           git push origin main

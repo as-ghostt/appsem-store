@@ -43,3 +43,13 @@ No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
 - URL asignada: `https://appsem-store.pages.dev`.
 - Este commit inicia una compilación de prueba mediante integración GitHub; la creación del proyecto no prueba aún funcionamiento de la web.
 - Vercel continúa intacto hasta confirmar un despliegue funcional y las verificaciones de seguridad.
+
+
+## Actualización comprobada — 10/11/2026
+- Cuenta exclusiva: Cloudflare `ceo.developer.appsem@gmail.com` y GitHub `as-ghostt`. Proyecto Cloudflare Pages `appsem-store`, rama `main` y despliegue automático activo.
+- URL de la tienda: `https://appsem-store.pages.dev`; despliegues confirmados con estado `success`.
+- Metadatos, canónicas, sitemap y enlaces legales locales se han orientado al nuevo dominio.
+- Backend `functions/api/interaction.js` ya está desplegado como Pages Function, con acceso a Firestore mediante `server/firestoreRest.js`, sin depender de la función Node de Vercel.
+- **Métricas seguras todavía NO activadas en producción:** faltan los secrets de Cloudflare `FIREBASE_SERVICE_ACCOUNT_JSON`, `METRICS_HMAC_SECRET` y `TURNSTILE_SECRET_KEY`, además de la site key de Turnstile con hostname nuevo. `METRICS_BACKEND_ENABLED=true`, `VITE_METRICS_BACKEND=server` y `VITE_TURNSTILE_SITE_KEY` deben configurarse únicamente después de validar la ruta de lectura, permisos y POST con un entorno de prueba.
+- La ruta Cloudflare retorna rechazo controlado cuando no está configurada. No se han ejecutado escrituras contra Firebase real.
+- Reglas Firestore, identidad de Firebase y colecciones preservadas; fases de auditoría aún abiertas. Vercel sigue disponible como respaldo mientras no se verifiquen las funciones dependientes de credenciales.

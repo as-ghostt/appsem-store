@@ -1,12 +1,12 @@
 /**
- * Smoke de solo lectura contra la API pública de Vercel.
+ * Smoke de solo lectura contra la API pública de Cloudflare.
  * Backend apagado: HTTP 503, JSON. Backend de ensayo read-only: 404,
  * JSON desde Firestore real para un ID artificial no publicado.
  * Jamás realiza POST ni modifica métricas; no envía tokens ni PII.
  */
 const dummyId = 'phase2-readiness-nonexistent-20261014';
 const visitor = 'ab36d7b0-9a53-4e7a-a5fe-a8d54f2074ab';
-const url = 'https://appsem-store.vercel.app/api/interaction?' +
+const url = 'https://appsem-store.pages.dev/api/interaction?' +
   new URLSearchParams({ appId: dummyId, visitorId: visitor });
 
 try {

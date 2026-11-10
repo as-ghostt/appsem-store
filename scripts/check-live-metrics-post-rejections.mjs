@@ -3,7 +3,7 @@
  * Ejecutar en CI después de configurar servidor 'read-only' o 'true'.
  * Verifica que Cloudflare y el control Origin impiden solicitudes no autorizadas.
  */
-const endpoint = 'https://appsem-store.vercel.app/api/interaction';
+const endpoint = 'https://appsem-store.pages.dev/api/interaction';
 const fake = {
   action: 'like',
   appId: 'phase2-synthetic-no-real-app',
@@ -34,13 +34,14 @@ async function post(headers) {
 try {
   const external = await post({ Origin: 'https://origin-not-allowed.example' });
   if (external.code === 503 &&
-      external.message === 'Registro de interacciones todavía no habilitado.') {
+      (external.message === 'Registro de interacciones todavía no habilitado.' ||
+       external.message === 'Métricas del servidor todavía no habilitadas.')) {
     if (process.env.METRICS_EXPECT_ACTIVE === 'true') {
       throw Error('Backend sigue en read-only cuando se esperaba escritura protegida activa.');
     }
-    console.info('PASS: read-only; POST bloqueado antes de Firebase y Turnstile.');
+    console.info('PASS: backend apagado/read-only; POST bloqueado antes de Firebase y Turnstile.');
   } else if (external.code === 403 && external.message === 'Origen no autorizado.') {
-    const forged = await post({ Origin: 'https://appsem-store.vercel.app' });
+    const forged = await post({ Origin: 'https://appsem-store.pages.dev' });
     if (forged.code !== 403 ||
         forged.message !== 'No se pudo validar la interacción.') {
       throw Error('La API no rechazó correctamente el token Cloudflare falso: HTTP ' + forged.code);

@@ -5,6 +5,7 @@ on:
     paths:
       - "api/**"
       - "server/**"
+      - "functions/**"
       - "src/services/**"
       - "src/pages/AppDetails.jsx"
       - "tests/**"
@@ -37,11 +38,9 @@ jobs:
       - name: Compilar Vite sin ejecutar prerender remoto
         run: npx vite build
 # No establece ni utiliza secrets Firebase, ni realiza deploy.
-      - name: Comprobar ruta externa Vercel (GET sin escrituras)
+      - name: Comprobar ruta externa Cloudflare (GET sin escrituras)
         run: node scripts/check-live-metrics-route.mjs
-      - name: Confirmar backend activo y rechazo de POST/tokens falsos
-        env:
-          METRICS_EXPECT_ACTIVE: "true"
+      - name: Verificar rechazos de API Cloudflare sin escrituras
         run: node scripts/check-live-metrics-post-rejections.mjs
       - name: Auditar reglas Firestore REAL con SDK anónimo (solo lectura)
         run: node scripts/audit-live-firestore-rules.mjs
