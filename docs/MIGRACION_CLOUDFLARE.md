@@ -1,6 +1,6 @@
-# Migración a Cloudflare — AppsEM Store
+# Migración a Cloudflare — Appsem Store
 
-Estado: **preparación parcial; despliegue NO realizado**.
+Estado actual (12/11/2026): **Cloudflare Pages en producción, métricas protegidas y 35 pruebas aprobadas.** Pendiente: prueba de una interacción real con Turnstile y retirada de Vercel. Las notas anteriores de preparación son históricas.
 
 ## GitHub y cuenta
 - Repositorio: `as-ghostt/appsem-store`; rama `main`.
