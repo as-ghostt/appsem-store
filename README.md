@@ -14,7 +14,7 @@ Página pública profesional para Appsem Store, hecha con React + Vite + Firebas
 - Comentarios con moderación: se envían como `approved: false`.
 - Conteo de clics de descarga antes de abrir Google Play.
 - Páginas legales: privacidad, cookies y términos.
-- Configuración para Vercel con rutas SPA.
+- Despliegue en Cloudflare Pages con rutas SEO prerenderizadas y Pages Functions.
 
 ## Comandos
 
@@ -78,10 +78,12 @@ apps/{appId}/comments
 apps/{appId}/downloadClicks
 ```
 
-## Reglas
+## Reglas y seguridad
 
-Copia el contenido de `firestore.rules` en Firebase Console > Firestore Database > Rules.
+La tienda utiliza Cloudflare Pages Functions en `/api/interaction` para registrar me gusta, valoraciones, clics de descarga y comentarios mediante Turnstile y transacciones Firestore.
 
-## Nota de seguridad
+**No copies `firestore.rules` de este repositorio a producción:** es una versión heredada, distinta de la candidata reforzada que mantiene Appsem Admin en `docs/fase-02/firestore.hardened.rules`. La auditoría anónima confirmó que las reglas reales ya bloquean el acceso directo del público a likes y ratings, y conservan la lectura del catálogo publicado.
 
-Esta versión permite interacciones públicas directamente desde Firestore. Para una protección antifraude más fuerte, lo ideal después será mover likes, descargas y valoraciones a Cloud Functions.
+El navegador utiliza `VITE_METRICS_BACKEND=server` en el despliegue de Cloudflare y el backend `METRICS_BACKEND_ENABLED=true`. Las claves privadas se guardan cifradas solo en Cloudflare, nunca en `VITE_*`.
+
+La compilación en Cloudflare ejecuta pruebas de seguridad, lint, auditoría de permisos reales de solo lectura y una prueba HTTP negativa con token Turnstile falso, antes de publicar. La prueba positiva completa de interacción con visitantes sigue pendiente de validación manual.

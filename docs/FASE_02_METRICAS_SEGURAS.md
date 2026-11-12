@@ -108,3 +108,12 @@ Configurar temporalmente `PHASE2_READINESS_CHECK=true` solo en Production de Ver
 - `scripts/check-live-metrics-route.mjs` acepta únicamente estos dos resultados exactos. NO realiza POST. Las pruebas unitarias aseguran que POST en `read-only` se bloquea ANTES de invocar Firebase Admin o Turnstile.
 - Esta es una comprobación de conexión, no una garantía de cuota de lecturas contra solicitudes públicas repetidas. Mantener el ensayo breve y monitorear errores/uso en Vercel y Firestore; después hacer corte coordinado a `true` + `VITE_METRICS_BACKEND=server` y reglas reforzadas solamente con plan de reversión.
 - No se modifica Firebase ni su configuración de reglas desde este cambio.
+
+
+## Estado real de Cloudflare — 12/11/2026
+La información histórica anterior sobre Vercel describe las pruebas originales y **no es la configuración de producción actual**.
+- Backend: Cloudflare Pages Function `/api/interaction`, `METRICS_BACKEND_ENABLED=true`.
+- Frontend: Vite compilado con `VITE_METRICS_BACKEND=server`; likes, valoraciones, comentarios y clics pasan por Turnstile y la API. Ya no se usa el camino Firestore público en esta compilación.
+- Reglas productivas: verificación anónima no destructiva confirmó bloqueo de likes, ratings, descargas privadas y comentarios sin filtro, y acceso al catálogo y comentarios aprobados. Se conservaron las reglas vigentes, sin nuevas publicaciones.
+- Compilación: pruebas unitarias, ESLint, auditoría real anónima y prueba HTTP de rechazos de Origin y token inválido ejecutadas antes del despliegue.
+- **Límite de verificación:** estas pruebas no equivalen todavía a completar una interacción real con token válido y comprobar escritura, respuesta y contador. Queda pendiente la prueba positiva y supervisión, así como reconciliación histórica de Fase 3. No retirar Vercel sin el corte operativo completo.

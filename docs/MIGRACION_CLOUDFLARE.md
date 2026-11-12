@@ -69,3 +69,12 @@ No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
 - Posteriormente se estableció `METRICS_BACKEND_ENABLED=true` y un nuevo despliegue de Pages finalizó `success` (deployment `5af77ee5-58d9-488d-a098-32e5bdae5443`).
 - **El cliente web conserva el flujo de métricas preexistente**: no se activó `VITE_METRICS_BACKEND=server`, porque no se verificó un POST completo con Turnstile válido. Las pruebas adicionales de navegador de Cloudflare devolvieron límite HTTP 429.
 - No se han realizado interacciones de escritura de prueba, cambios de reglas Firestore ni migración de datos. No retirar la alternativa anterior mientras falte la prueba real de POST y validación de seguridad del flujo completo.
+
+
+## Avance confirmado — 12/11/2026: frontend seguro activo
+- Se comprobó el estado de Production de Cloudflare: `METRICS_BACKEND_ENABLED=true` y `VITE_METRICS_BACKEND=server`. La compilación con frontend seguro terminó `success` (deployment `95bcf971-34bf-4af6-b386-80ceb6d0cffa`).
+- Se incorporaron condiciones obligatorias al build de Cloudflare: `npm run test:security`, `npm run lint`, `scripts/audit-live-firestore-rules.mjs` sin credenciales administrativas y `scripts/check-live-metrics-post-rejections.mjs`.
+- Resultado de auditoría **real, anónima y sin escrituras**: catálogo publicado y comentarios aprobados legibles; likes, valoraciones, historial de descargas y comentarios no aprobados rechazados por reglas reales.
+- Resultado del test negativo HTTP real: origen externo rechazado, token Turnstile falso rechazado, ninguna escritura ejecutada. Las 31 pruebas preexistentes pasaron. Se amplía la suite con simulación integral del backend para cubrir la escritura atómica.
+- Tras estas verificaciones, el cliente React usa la API segura en lugar de escribir directamente los contadores. **Pendiente**: ensayo positivo de interacción con token Turnstile legítimo y seguimiento de errores/contadores, y prueba real de subida de APK de Appsem Admin antes de retirar Vercel.
+- No se publicaron ni modificaron reglas de Firestore en este avance, no se escribieron registros de prueba en datos reales y no se borró Vercel.

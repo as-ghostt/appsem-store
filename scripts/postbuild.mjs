@@ -209,7 +209,7 @@ async function main() {
   await writeFile(join(DIST, "sitemap.xml"), sitemap(apps), "utf8");
   await versionServiceWorker();
 
-  if (apps.length === 0) console.info("Catálogo vacío: se publica la tienda sin fichas de aplicaciones.");
+  if (apps.length === 0) console.log("Catálogo vacío: se publica la tienda sin fichas de aplicaciones.");
   console.log(`Prerender completado: ${apps.length} fichas, rutas institucionales, 404 y sitemap.`);
 }
 
