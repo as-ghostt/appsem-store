@@ -62,3 +62,10 @@ No se modificaron reglas Firestore ni se ejecutaron migraciones de datos.
 - `METRICS_HMAC_SECRET`: generado criptográficamente y guardado cifrado en Cloudflare Pages.
 - **Falta `FIREBASE_SERVICE_ACCOUNT_JSON`**, credencial de Google/Firebase que no está disponible en los conectores. No activar `METRICS_BACKEND_ENABLED=true` ni `VITE_METRICS_BACKEND=server` sin esta credencial, prueba de reglas y verificación Turnstile.
 - Este commit vuelve a compilar la tienda para incorporar la site key sin alterar la funcionalidad actualmente activa.
+
+## Verificación del 12/11/2026 — Firebase confirmado
+- Se comprobó en Cloudflare CEO que `FIREBASE_SERVICE_ACCOUNT_JSON`, `METRICS_HMAC_SECRET` y `TURNSTILE_SECRET_KEY` existen como secretos cifrados de Production.
+- La API `/api/interaction` se desplegó con `METRICS_BACKEND_ENABLED=read-only` y una lectura de prueba desde Cloudflare Browser Rendering devolvió correctamente `Aplicación no publicada.` sobre un ID inexistente. Esto confirmó la autenticación de la cuenta de servicio y la lectura remota en Firestore.
+- Posteriormente se estableció `METRICS_BACKEND_ENABLED=true` y un nuevo despliegue de Pages finalizó `success` (deployment `5af77ee5-58d9-488d-a098-32e5bdae5443`).
+- **El cliente web conserva el flujo de métricas preexistente**: no se activó `VITE_METRICS_BACKEND=server`, porque no se verificó un POST completo con Turnstile válido. Las pruebas adicionales de navegador de Cloudflare devolvieron límite HTTP 429.
+- No se han realizado interacciones de escritura de prueba, cambios de reglas Firestore ni migración de datos. No retirar la alternativa anterior mientras falte la prueba real de POST y validación de seguridad del flujo completo.
