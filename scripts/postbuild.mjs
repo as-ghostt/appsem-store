@@ -209,8 +209,8 @@ async function main() {
   await writeFile(join(DIST, "sitemap.xml"), sitemap(apps), "utf8");
   await versionServiceWorker();
 
-  if (apps.length === 0) console.log("Catálogo vacío: se publica la tienda sin fichas de aplicaciones.");
-  console.log(`Prerender completado: ${apps.length} fichas, rutas institucionales, 404 y sitemap.`);
+  if (apps.length === 0) process.stdout.write("Catálogo vacío: se publica la tienda sin fichas de aplicaciones.\n");
+  process.stdout.write(`Prerender completado: ${apps.length} fichas, rutas institucionales, 404 y sitemap.\n`);
 }
 
 main().catch((error) => {
