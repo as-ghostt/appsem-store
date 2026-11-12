@@ -73,9 +73,8 @@ test('Cloudflare POST with valid mocked Turnstile writes one atomic transaction'
   };
   try {
     const response = await onRequest({ request: req(body), env });
-    assert.equal(response.status, 200, await response.text().catch(() => ''));
-    // Body already consumed only when assertion above fails.
     const payload = await response.json();
+    assert.equal(response.status, 200, JSON.stringify(payload));
     assert.deepEqual(payload, { action: 'like', alreadyRecorded: false });
     assert.equal(verified, 1);
     assert.equal(oauth, 1);
