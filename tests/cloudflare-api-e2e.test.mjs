@@ -81,7 +81,7 @@ test('Cloudflare POST with valid mocked Turnstile writes one atomic transaction'
     assert.equal(writes.length, 3);
     assert.match(writes[0].update.name, /\/apps\/synthetic-published-app\/likes\/[0-9a-f]{64}$/);
     assert.equal(writes[0].currentDocument.exists, false);
-    assert.equal(writes[1].update.name.endsWith('/apps/synthetic-published-app'), true);
+    assert.equal(writes[1].transform.document.endsWith('/apps/synthetic-published-app'), true);
     assert.equal(writes[1].transform.fieldTransforms.find(f => f.fieldPath === 'likesCount')?.increment.integerValue, '1');
     assert.match(writes[2].update.name, /\/metricsLimits\//);
     assert.equal(writes[2].update.fields.count.integerValue, '1');
