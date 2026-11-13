@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import AppCard from "../components/AppCard";
 import { useVerifiedMetrics } from "../services/verifiedInteractions";
-import { validatedDownloadUrl } from "../services/safeDownloadUrl";
+import { validatedDownloadUrl, validatedPlayStoreDownloadUrl, validatedGithubApkDownloadUrl } from "../services/safeDownloadUrl";
 import CommentSection from "../components/CommentSection";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
@@ -243,7 +243,9 @@ export default function AppDetails() {
   const bannerStyle = app.bannerUrl
     ? { backgroundImage: `linear-gradient(100deg, rgba(4, 10, 25, .72), rgba(4, 10, 25, .24)), url(${app.bannerUrl})` }
     : undefined;
-  const directDownloadUrl = app.downloadUrl || app.apkUrl || app.playStoreUrl;
+  const apkDownloadUrl = validatedGithubApkDownloadUrl(app.apkUrl) || validatedGithubApkDownloadUrl(app.downloadUrl);
+  const playStoreDownloadUrl = validatedPlayStoreDownloadUrl(app.playStoreUrl);
+  const directDownloadUrl = apkDownloadUrl || playStoreDownloadUrl;
   const categoryLabel = categoryMap[app.categoryKey] || app.category || "App";
   const description = app.seoDescription || app.shortDescription || app.fullDescription || `Descubre ${app.title} en Appsem Store.`;
   const appUrl = `${(import.meta.env.VITE_PUBLIC_SITE_ORIGIN || 'https://appsem-store.pages.dev').replace(/[/]$/, '')}/app/${app.slug}`;
@@ -322,7 +324,7 @@ export default function AppDetails() {
             <button className="app-direct-download" onClick={() => openDownload(directDownloadUrl)} disabled={!directDownloadUrl || downloadPending} type="button">
               <Download size={19} /> Descargar
             </button>
-            <button className="app-play-store-button" onClick={() => openDownload(app.playStoreUrl)} disabled={!app.playStoreUrl || downloadPending} type="button">
+            <button className="app-play-store-button" onClick={() => openDownload(playStoreDownloadUrl)} disabled={!playStoreDownloadUrl || downloadPending} type="button">
               <span className="play-store-mark" aria-hidden="true">▶</span> Google Play
             </button>
             <button className={`app-like-button ${liked ? "active" : ""}`} onClick={handleLike} disabled={liked || interactionPending} type="button">
@@ -341,7 +343,7 @@ export default function AppDetails() {
             </div>
           ) : null}
 
-          {app.apkUrl || app.downloadUrl ? (
+          {apkDownloadUrl ? (
             <p className="muted-text">Descarga oficial proporcionada por {app.developer || "AppsMart Technology"}. Verifica la versión y el origen antes de instalar.</p>
           ) : null}
 
