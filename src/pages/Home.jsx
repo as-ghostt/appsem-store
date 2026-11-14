@@ -5,7 +5,7 @@ import AppCard from "../components/AppCard";
 import CategoryTabs from "../components/CategoryTabs";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
-import { categories, categoryMap } from "../data/categories";
+import { categories, categoryMap, appMatchesCategory } from "../data/categories";
 import { getPublishedAppsPage } from "../services/appsService";
 import { fallbackIcon, showFallbackAppIcon } from "../utils/appIconFallback.js";
 
@@ -16,35 +16,6 @@ function formatNumber(value) {
   return new Intl.NumberFormat("es-PE", {
     notation: Number(value || 0) >= 10000 ? "compact" : "standard"
   }).format(value || 0);
-}
-
-function normalizeCategory(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase();
-}
-
-function appMatchesCategory(app, category) {
-  const aliases = {
-    "books-reference": ["books-reference", "libros-referencias", "libros y referencias", "bible", "biblia", "biblias", "christian", "cristiana", "cristiano"],
-    tools: ["tools", "herramienta", "herramientas"],
-    education: ["education", "educacion"],
-    entertainment: ["entertainment", "entretenimiento"],
-    productivity: ["productivity", "productividad"],
-    lifestyle: ["lifestyle", "estilo de vida"],
-    games: ["games", "juego", "juegos"],
-    other: ["other", "otros", "otro"]
-  };
-
-  const accepted = new Set([
-    normalizeCategory(category.key),
-    normalizeCategory(category.label),
-    ...(aliases[category.key] || [])
-  ]);
-
-  return accepted.has(normalizeCategory(app.categoryKey)) || accepted.has(normalizeCategory(app.category));
 }
 
 function AppRowCard({ app, featured = false }) {
@@ -155,13 +126,18 @@ export default function Home() {
       .some((value) => String(value).toLowerCase().includes(term)));
   }, [apps, searchTerm]);
 
+  const availableCategories = useMemo(
+    () => categories.filter((category) => category.key === "all" || apps.some((app) => appMatchesCategory(app, category))),
+    [apps]
+  );
+
   const categorySections = useMemo(() => {
-    const visible = categories.filter((category) => category.key !== "all");
+    const visible = availableCategories.filter((category) => category.key !== "all");
     const selected = activeCategory === "all" ? visible : visible.filter((category) => category.key === activeCategory);
     return selected
       .map((category) => ({ ...category, apps: apps.filter((app) => appMatchesCategory(app, category)) }))
       .filter((category) => category.apps.length > 0);
-  }, [apps, activeCategory]);
+  }, [apps, activeCategory, availableCategories]);
 
   function updateSearch(value) {
     const next = new URLSearchParams(searchParams);
@@ -178,7 +154,7 @@ export default function Home() {
 
   return (
     <>
-      <CategoryTabs activeCategory={activeCategory} onChange={setActiveCategory} />
+      <CategoryTabs activeCategory={activeCategory} onChange={setActiveCategory} availableCategories={availableCategories} />
       <main className="container home-store-content">
         {loading ? <LoadingState text="Cargando apps publicadas..." /> : null}
         {error ? <div className="error-box">{error}</div> : null}
