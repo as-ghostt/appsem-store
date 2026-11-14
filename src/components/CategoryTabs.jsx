@@ -1,10 +1,10 @@
 import { categories } from "../data/categories";
 
-export default function CategoryTabs({ activeCategory, onChange, availableCategories = categories }) {
+export default function CategoryTabs({ activeCategory, onChange }) {
   return (
     <section className="category-bar" aria-label="Categorías de apps">
       <div className="container category-scroll">
-        {availableCategories.map((category) => (
+        {categories.map((category) => (
           <button
             className={`category-pill ${activeCategory === category.key ? "active" : ""}`}
             key={category.key}
