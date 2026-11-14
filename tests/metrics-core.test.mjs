@@ -99,6 +99,19 @@ test('Cálculo de ratings compatible con campos históricos', () => {
   assert.throws(() => nextRating({ ratingCount: 2, ratingAverage: 0, ratingSum: 0 }, 4), PublicError);
 });
 
+test('Las valoraciones históricas con ratingCount=1, promedio=5 y ratingSum=0 se recuperan al votar', () => {
+  const historic = { ratingCount: 1, ratingAverage: 5, ratingSum: 0 };
+  // El backend toma el promedio histórico correcto como base y no lo pierde.
+  assert.deepEqual(nextRating(historic, 4), {
+    ratingCount: 2, ratingSum: 9, ratingAverage: 4.5
+  });
+  assert.deepEqual(nextRating(historic, 5), {
+    ratingCount: 2, ratingSum: 10, ratingAverage: 5
+  });
+  // La comprobación de cálculo NO modifica el documento histórico.
+  assert.deepEqual(historic, { ratingCount: 1, ratingAverage: 5, ratingSum: 0 });
+});
+
 test('Like: una sola operación por visitante, contador+evento+rate limit atómicos', async () => {
   const { db, docs, FieldValue } = mockDb();
   const params = { db, FieldValue, payload: sample, ip: '198.51.100.15', secret };
