@@ -18,6 +18,7 @@ import LoadingState from "../components/LoadingState";
 import RatingStars from "../components/RatingStars";
 import ScreenshotGallery from "../components/ScreenshotGallery";
 import Seo from "../components/Seo";
+import { fallbackIcon, showFallbackAppIcon } from "../utils/appIconFallback.js";
 import { categoryMap } from "../data/categories";
 import {
   checkUserInteraction,
@@ -29,7 +30,6 @@ import {
   submitRating
 } from "../services/appsService";
 
-const fallbackIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%231e293b'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='34' font-weight='700' fill='white'%3EAS%3C/text%3E%3C/svg%3E";
 
 function formatNumber(value) {
   return new Intl.NumberFormat("es-PE", {
@@ -261,7 +261,7 @@ export default function AppDetails() {
           <div className="app-summary-wrap">
             <div className="app-summary-card">
               <div className="app-summary-head">
-                <img className="app-summary-icon" src={app.iconUrl || fallbackIcon} alt={`Icono de ${app.title}`} />
+                <img className="app-summary-icon" src={app.iconUrl || fallbackIcon} alt={`Icono de ${app.title}`} onError={showFallbackAppIcon} />
                 <div className="app-summary-copy">
                   <span className="app-category light-category app-summary-category">{categoryLabel}</span>
                   <h1>{app.title}</h1>
