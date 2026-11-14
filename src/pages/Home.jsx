@@ -7,9 +7,10 @@ import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
 import { categories, categoryMap } from "../data/categories";
 import { getPublishedAppsPage } from "../services/appsService";
+import { fallbackIcon, showFallbackAppIcon } from "../utils/appIconFallback.js";
 
 const PAGE_SIZE = 24;
-const fallbackIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%231e293b'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='34' font-weight='700' fill='white'%3EAS%3C/text%3E%3C/svg%3E";
+
 
 function formatNumber(value) {
   return new Intl.NumberFormat("es-PE", {
@@ -57,7 +58,7 @@ function AppRowCard({ app, featured = false }) {
     >
       {featured ? <div className="home-row-app-banner" style={bannerStyle} aria-hidden="true" /> : null}
       <div className="home-row-app-body">
-        <img src={app.iconUrl || fallbackIcon} alt={`Icono de ${app.title}`} loading="lazy" decoding="async" />
+        <img src={app.iconUrl || fallbackIcon} alt={`Icono de ${app.title}`} loading="lazy" decoding="async" onError={showFallbackAppIcon} />
         <div className="home-row-app-copy">
           <strong>{app.title}</strong>
           <span>{categoryMap[app.categoryKey] || app.category || "App"}</span>
