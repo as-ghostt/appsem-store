@@ -11,8 +11,7 @@ import {
   Shield
 } from "lucide-react";
 import AppCard from "../components/AppCard";
-import { useVerifiedMetrics } from "../services/verifiedInteractions";
-import { validatedDownloadUrl, validatedPlayStoreDownloadUrl, validatedGithubApkDownloadUrl } from "../services/safeDownloadUrl";
+import { validatedPlayStoreDownloadUrl, validatedGithubApkDownloadUrl } from "../services/safeDownloadUrl";
 import CommentSection from "../components/CommentSection";
 import EmptyState from "../components/EmptyState";
 import LoadingState from "../components/LoadingState";
@@ -57,11 +56,7 @@ export default function AppDetails() {
   const [liked, setLiked] = useState(false);
   const [rated, setRated] = useState(null);
   const [interactionPending, setInteractionPending] = useState(false);
-  const [downloadPending, setDownloadPending] = useState(false);
-  const [downloadReady, setDownloadReady] = useState("");
-  const [downloadMessage, setDownloadMessage] = useState("");
   const interactionPendingRef = useRef(false);
-  const downloadPendingRef = useRef(false);
   const [interactionMessage, setInteractionMessage] = useState("");
   const [aboutExpanded, setAboutExpanded] = useState(false);
 
@@ -71,8 +66,6 @@ export default function AppDetails() {
     async function loadApp() {
       setLoading(true);
       setError("");
-      setDownloadReady("");
-      setDownloadMessage("");
       setLiked(false);
       setRated(null);
       setInteractionMessage("");
@@ -179,49 +172,21 @@ export default function AppDetails() {
     }
   }
 
-  async function openDownload(url) {
-    if (!url || !app || downloadPendingRef.current) return;
-    if (!useVerifiedMetrics) {
-      // No cambiar el comportamiento heredado hasta el corte coordinado.
-      try {
-        const tracked = await registerDownloadClick(app, url);
+  function trackDownload(url) {
+    if (!url || !app) return;
+    // El enlace nativo navega en este mismo clic; el registro es secundario,
+    // nunca bloquea ni añade una segunda pantalla de verificación.
+    void registerDownloadClick(app, url)
+      .then((tracked) => {
         if (!tracked?.alreadyRecorded) {
-          setApp((current) => ({ ...current, downloadsCount: Number(current.downloadsCount || 0) + 1 }));
+          setApp((current) => current
+            ? { ...current, downloadsCount: Number(current.downloadsCount || 0) + 1 }
+            : current);
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        window.open(url, "_blank", "noopener,noreferrer");
-      }
-      return;
-    }
-
-    // Una verificación Turnstile asíncrona pierde el gesto de usuario para window.open.
-    // Ofrecer el enlace en un segundo clic evita bloqueos emergentes.
-    const safeUrl = validatedDownloadUrl(url);
-    if (!safeUrl) {
-      setDownloadMessage("El enlace oficial no es una URL HTTPS válida.");
-      return;
-    }
-    downloadPendingRef.current = true;
-    setDownloadPending(true);
-    setDownloadReady("");
-    setDownloadMessage("Verificando la descarga...");
-    try {
-      const tracked = await registerDownloadClick(app, url);
-      if (!tracked?.alreadyRecorded) {
-        setApp((current) => ({ ...current, downloadsCount: Number(current.downloadsCount || 0) + 1 }));
-      }
-      setDownloadMessage("Verificación completada. Pulsa «Abrir descarga» para continuar.");
-    } catch (err) {
-      console.error(err);
-      // El enlace oficial puede seguir accesible aunque las métricas fallen.
-      setDownloadMessage("No se pudo registrar el clic. Puedes abrir la descarga oficial igualmente.");
-    } finally {
-      setDownloadReady(safeUrl);
-      setDownloadPending(false);
-      downloadPendingRef.current = false;
-    }
+      })
+      .catch((err) => {
+        console.error("No se pudo registrar la descarga:", err);
+      });
   }
 
   async function reloadComments() {
@@ -321,31 +286,24 @@ export default function AppDetails() {
       <section className="container detail-layout">
         <div className="detail-main">
           <div className="app-download-actions" aria-label="Opciones de descarga">
-            <button className="app-direct-download" onClick={() => openDownload(directDownloadUrl)} disabled={!directDownloadUrl || downloadPending} type="button">
-              <Download size={19} /> Descargar
-            </button>
-            <button className="app-play-store-button" onClick={() => openDownload(playStoreDownloadUrl)} disabled={!playStoreDownloadUrl || downloadPending} type="button">
-              <span className="play-store-mark" aria-hidden="true">▶</span> Google Play
-            </button>
+            {directDownloadUrl ? (
+              <a className="app-direct-download" href={directDownloadUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackDownload(directDownloadUrl)}>
+                <Download size={19} /> Descargar
+              </a>
+            ) : (
+              <button className="app-direct-download" disabled type="button"><Download size={19} /> Descargar</button>
+            )}
+            {playStoreDownloadUrl ? (
+              <a className="app-play-store-button" href={playStoreDownloadUrl} target="_blank" rel="noopener noreferrer" onClick={() => trackDownload(playStoreDownloadUrl)}>
+                <span className="play-store-mark" aria-hidden="true">▶</span> Google Play
+              </a>
+            ) : (
+              <button className="app-play-store-button" disabled type="button"><span className="play-store-mark" aria-hidden="true">▶</span> Google Play</button>
+            )}
             <button className={`app-like-button ${liked ? "active" : ""}`} onClick={handleLike} disabled={liked || interactionPending} type="button">
               <Heart size={19} fill={liked ? "currentColor" : "none"} /> {liked ? "Te gusta" : "Me gusta"}
             </button>
           </div>
-
-          {useVerifiedMetrics && downloadMessage ? (
-            <div className="form-message" role="status">
-              <p>{downloadMessage}</p>
-              {downloadReady ? (
-                <a className="app-direct-download" href={downloadReady} target="_blank" rel="noopener noreferrer">
-                  <Download size={19} /> Abrir descarga
-                </a>
-              ) : null}
-            </div>
-          ) : null}
-
-          {apkDownloadUrl ? (
-            <p className="muted-text">Descarga oficial proporcionada por {app.developer || "AppsMart Technology"}. Verifica la versión y el origen antes de instalar.</p>
-          ) : null}
 
           <section className="app-screenshots-section" aria-label={`Capturas de pantalla de ${app.title}`}>
             <ScreenshotGallery screenshots={app.screenshots} title={app.title} />
