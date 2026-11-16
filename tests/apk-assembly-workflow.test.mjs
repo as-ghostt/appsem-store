@@ -35,4 +35,12 @@ test('APK assembler verifies every downloaded part and validates the final ZIP s
   assert.match(workflow, /final_asset = by_name\.get\(file_name\)/);
   assert.match(workflow, /APPSEM_FINAL_EXISTS/);
   assert.match(workflow, /env\.APPSEM_FINAL_EXISTS != '1'/);
+  assert.match(workflow, /\[signer, 'verify', '--verbose', file_name\]/);
+  assert.match(workflow, /Android SDK Build Tools apksigner no está disponible/);
+  assert.ok(
+    workflow.indexOf("[signer, 'verify', '--verbose', file_name]") <
+    workflow.indexOf('gh release upload "$APPSEM_TAG" "$APPSEM_FILE"'),
+    'the APK signature must be verified before upload'
+  );
+  assert.match(workflow, /releases\/assets\/\{final_asset\["id"\]\}/);
 });
