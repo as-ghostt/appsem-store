@@ -51,26 +51,35 @@ jobs:
               return urllib.request.urlopen(request, timeout=90)
           with api(f'/repos/{repo}/releases/{rid}') as response:
               release = json.load(response)
-          marker = 'APPSEM_CHUNKED_V1\n'
-          body = release.get('body') or ''
-          if not body.startswith(marker):
-              raise ValueError('Release sin metadatos de subida Appsem')
-          meta = json.loads(body[len(marker):].split('\n', 1)[0])
-          file_name = meta.get('name', '')
-          size = meta.get('size')
-          count = meta.get('parts')
-          chunk_size = 20 * 1024 * 1024
-          if meta.get('appsemUpload') != 1 or not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{0,110}\.apk', file_name, re.I):
-              raise ValueError('Metadatos del APK incorrectos')
-          if not isinstance(size, int) or not 0 < size <= 1_900_000_000 or not isinstance(count, int) or count != (size + chunk_size - 1) // chunk_size:
-              raise ValueError('Tamaño o cantidad de partes inválidos')
-          if release.get('tag_name') != f'apk-{meta["slug"]}-v{meta["version"]}':
-              raise ValueError('El tag de release no coincide')
+          if release.get('id') != int(rid):
+              raise ValueError('El ID de release no coincide con el evento')
           if not release.get('draft'):
               print('La release ya está publicada; salida idempotente.')
               with open(os.environ['GITHUB_ENV'], 'a') as env:
-                  env.write('APPSEM_SKIP=1\n')
+                  env.write('APPSEM_SKIP=1\\n')
               sys.exit(0)
+          marker = 'APPSEM_CHUNKED_V1\\n'
+          body = release.get('body') or ''
+          if not body.startswith(marker):
+              raise ValueError('Release sin metadatos de subida Appsem')
+          meta = json.loads(body[len(marker):].split('\\n', 1)[0])
+          file_name = meta.get('name', '')
+          slug = meta.get('slug', '')
+          version = meta.get('version', '')
+          size = meta.get('size')
+          count = meta.get('parts')
+          chunk_size = 20 * 1024 * 1024
+          if (meta.get('appsemUpload') != 1 or
+              not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or
+              not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._+-]{0,50}', version) or
+              not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{0,110}\\.apk', file_name, re.I)):
+              raise ValueError('Metadatos del APK incorrectos')
+          if (not isinstance(size, int) or isinstance(size, bool) or
+              not 0 < size <= 1_900_000_000 or not isinstance(count, int) or
+              isinstance(count, bool) or count != (size + chunk_size - 1) // chunk_size):
+              raise ValueError('Tamaño o cantidad de partes inválidos')
+          if release.get('tag_name') != f'apk-{slug}-v{version}':
+              raise ValueError('El tag de release no coincide')
           with api(f'/repos/{repo}/releases/{rid}/assets?per_page=100') as response:
               assets = json.load(response)
           by_name = {a.get('name'): a for a in assets}
