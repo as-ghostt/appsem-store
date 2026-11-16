@@ -19,6 +19,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       APPSEM_RELEASE_ID: ${{ github.event.client_payload.release_id }}
+      BOTSHOW_APK_CERT_SHA256: ${{ vars.BOTSHOW_APK_CERT_SHA256 }}
     steps:
       - name: Validar borrador, unir partes y verificar el APK
         shell: bash
@@ -71,6 +72,8 @@ jobs:
           size = meta.get('size')
           count = meta.get('parts')
           chunk_size = 20 * 1024 * 1024
+          if (slug != 'botshow'):
+              raise ValueError('Este flujo de APK está reservado exclusivamente a BotShow')
           if (meta.get('appsemUpload') != 1 or
               not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or
               not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._+-]{0,50}', version) or
@@ -142,10 +145,20 @@ jobs:
           if not signer:
               raise RuntimeError('Android SDK Build Tools apksigner no está disponible en el runner')
           verification = subprocess.run(
-              [signer, 'verify', '--verbose', file_name],
+              [signer, 'verify', '--verbose', '--print-certs', file_name],
               check=True, capture_output=True, text=True, timeout=120
           )
-          print('Firma APK verificada criptográficamente por apksigner.')
+          expected_cert = re.sub(r'[^0-9A-Fa-f]', '', os.environ.get('BOTSHOW_APK_CERT_SHA256', '')).upper()
+          if not re.fullmatch(r'[0-9A-F]{64}', expected_cert):
+              raise RuntimeError('Falta configurar la variable BOTSHOW_APK_CERT_SHA256 con la huella oficial SHA-256 de BotShow')
+          signer_output = verification.stdout + '\\n' + verification.stderr
+          found_certs = {
+              re.sub(r'[^0-9A-Fa-f]', '', value).upper()
+              for value in re.findall(r'certificate SHA-256 digest:\\s*([0-9A-Fa-f:]+)', signer_output, re.I)
+          }
+          if expected_cert not in found_certs:
+              raise RuntimeError('El certificado firmante del APK no coincide con la huella oficial de BotShow')
+          print('Firma APK válida y certificado SHA-256 coincidente con BotShow.')
           if verification.stdout:
               print(verification.stdout)
           if verification.stderr:
