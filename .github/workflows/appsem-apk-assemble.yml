@@ -83,41 +83,56 @@ jobs:
           with api(f'/repos/{repo}/releases/{rid}/assets?per_page=100') as response:
               assets = json.load(response)
           by_name = {a.get('name'): a for a in assets}
-          temp = 'appsem-assembled.apk'
-          with open(temp, 'wb') as output:
-              for index in range(count):
-                  part_name = f'appsem-part-{index:03}.bin'
-                  asset = by_name.get(part_name)
-                  expected = size - chunk_size * index if index == count - 1 else chunk_size
-                  if not asset or asset.get('state') != 'uploaded' or asset.get('size') != expected:
-                      raise ValueError(f'Parte {index + 1}/{count} ausente o incompleta')
-                  start = output.tell()
-                  with api(f'/repos/{repo}/releases/assets/{asset["id"]}', 'application/octet-stream') as response:
-                      if 'application/json' in response.headers.get('Content-Type', ''):
-                          raise ValueError('GitHub no devolvió los bytes de la parte')
-                      shutil.copyfileobj(response, output, length=1024*1024)
-                  if output.tell() - start != expected:
-                      raise ValueError(f'Error en el tamaño recibido para la parte {index + 1}')
-          if os.path.getsize(temp) != size:
-              raise ValueError('El tamaño del APK ensamblado no coincide')
-          with zipfile.ZipFile(temp, 'r') as archive:
-              if 'AndroidManifest.xml' not in archive.namelist():
-                  raise ValueError('El archivo no contiene AndroidManifest.xml')
-              if archive.testzip() is not None:
-                  raise ValueError('El APK contiene archivos ZIP dañados')
-          os.rename(temp, file_name)
+          final_asset = by_name.get(file_name)
+          if final_asset:
+              if final_asset.get('state') != 'uploaded' or final_asset.get('size') != size:
+                  raise ValueError('El APK final existente no coincide con los metadatos')
+              final_exists = True
+          else:
+              final_exists = False
+          if not final_exists:
+              temp = 'appsem-assembled.apk'
+              with open(temp, 'wb') as output:
+                  for index in range(count):
+                      part_name = f'appsem-part-{index:03}.bin'
+                      asset = by_name.get(part_name)
+                      expected = size - chunk_size * index if index == count - 1 else chunk_size
+                      if not asset or asset.get('state') != 'uploaded' or asset.get('size') != expected:
+                          raise ValueError(f'Parte {index + 1}/{count} ausente o incompleta')
+                      start = output.tell()
+                      with api(f'/repos/{repo}/releases/assets/{asset["id"]}', 'application/octet-stream') as response:
+                          if 'application/json' in response.headers.get('Content-Type', ''):
+                              raise ValueError('GitHub no devolvió los bytes de la parte')
+                          shutil.copyfileobj(response, output, length=1024*1024)
+                      if output.tell() - start != expected:
+                          raise ValueError(f'Error en el tamaño recibido para la parte {index + 1}')
+              if os.path.getsize(temp) != size:
+                  raise ValueError('El tamaño del APK ensamblado no coincide')
+              with zipfile.ZipFile(temp, 'r') as archive:
+                  if 'AndroidManifest.xml' not in archive.namelist():
+                      raise ValueError('El archivo no contiene AndroidManifest.xml')
+                  if archive.testzip() is not None:
+                      raise ValueError('El APK contiene archivos ZIP dañados')
+              os.rename(temp, file_name)
           with open('appsem-chunk-ids.txt', 'w') as ids:
               for index in range(count):
-                  ids.write(str(by_name[f'appsem-part-{index:03}.bin']['id']) + '\n')
+                  asset = by_name.get(f'appsem-part-{index:03}.bin')
+                  if asset:
+                      if asset.get('state') != 'uploaded':
+                          raise ValueError(f'Parte {index + 1}/{count} no está completa')
+                      ids.write(str(asset['id']) + '\n')
+                  elif not final_exists:
+                      raise ValueError(f'Parte {index + 1}/{count} ausente')
           with open(os.environ['GITHUB_ENV'], 'a') as env:
               env.write('APPSEM_TAG=' + release['tag_name'] + '\n')
               env.write('APPSEM_FILE=' + file_name + '\n')
+              env.write('APPSEM_FINAL_EXISTS=' + ('1' if final_exists else '0') + '\n')
               env.write('APPSEM_SKIP=0\n')
           print(f'APK verificado: {file_name}, {size} bytes, {count} partes')
           PY
 
       - name: Publicar archivo APK completo en la release privada
-        if: ${{ env.APPSEM_SKIP != '1' }}
+        if: ${{ env.APPSEM_SKIP != '1' && env.APPSEM_FINAL_EXISTS != '1' }}
         shell: bash
         run: |
           set -euo pipefail
