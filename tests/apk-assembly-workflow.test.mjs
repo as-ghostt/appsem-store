@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
 const workflow = await readFile(new URL('../.github/workflows/appsem-apk-assemble.yml', import.meta.url), 'utf8');
+const ciWorkflow = await readFile(new URL('../.github/workflows/phase-02-metrics.yml', import.meta.url), 'utf8');
 
 test('APK assembler only accepts its dedicated repository_dispatch event', () => {
   assert.match(workflow, /repository_dispatch:\s*\n\s*types:\s*\[appsem_apk_assemble\]/);
@@ -43,4 +44,6 @@ test('APK assembler verifies every downloaded part and validates the final ZIP s
     'the APK signature must be verified before upload'
   );
   assert.match(workflow, /releases\/assets\/\{final_asset\["id"\]\}/);
+  assert.match(ciWorkflow, /Confirmar Android SDK Build Tools para verificación APK/);
+  assert.match(ciWorkflow, /\$signer version/);
 });
