@@ -38,6 +38,11 @@ test('APK assembler verifies every downloaded part and validates the final ZIP s
   assert.match(workflow, /env\.APPSEM_FINAL_EXISTS != '1'/);
   assert.match(workflow, /\[signer, 'verify', '--verbose', file_name\]/);
   assert.match(workflow, /Android SDK Build Tools apksigner no está disponible/);
+  assert.match(workflow, /slug != 'botshow'/);
+  assert.match(workflow, /BOTSHOW_APK_CERT_SHA256/);
+  assert.match(workflow, /--print-certs/);
+  assert.match(workflow, /certificate SHA-256 digest/);
+  assert.match(workflow, /El certificado firmante del APK no coincide con la huella oficial de BotShow/);
   assert.ok(
     workflow.indexOf("[signer, 'verify', '--verbose', file_name]") <
     workflow.indexOf('gh release upload "$APPSEM_TAG" "$APPSEM_FILE"'),
