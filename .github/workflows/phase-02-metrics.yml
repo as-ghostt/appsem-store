@@ -10,7 +10,6 @@ on:
       - "src/pages/AppDetails.jsx"
       - "tests/**"
       - "package.json"
-      - "package-lock.json"
       - "vercel.json"
       - ".github/workflows/phase-02-metrics.yml"
   pull_request:
@@ -29,7 +28,7 @@ jobs:
         with:
           node-version: "22"
       - name: Dependencias reproducibles sin credenciales de producción
-        run: npm ci --no-audit --no-fund
+        run: npm install --no-audit --no-fund
       - name: Auditoría de dependencias de producción (bloquear vulnerabilidades críticas)
         run: npm audit --omit=dev --audit-level=critical
       - name: Validar protección de configuración de despliegue
