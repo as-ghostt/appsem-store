@@ -50,5 +50,5 @@ test('APK assembler verifies every downloaded part and validates the final ZIP s
   );
   assert.match(workflow, /releases\/assets\/\{final_asset\["id"\]\}/);
   assert.match(ciWorkflow, /Confirmar Android SDK Build Tools para verificación APK/);
-  assert.match(ciWorkflow, /\$signer version/);
+  assert.match(ciWorkflow, /"\$signer" version/);
 });
