@@ -18,7 +18,7 @@ test('APK assembler validates the event release ID and refuses non-draft metadat
 
 test('APK assembler validates slug, version, filename, size and exact part count', () => {
   assert.match(workflow, /\[a-z0-9\]\+\(\?:-\[a-z0-9\]\+\)\*/);
-  assert.match(workflow, /\[a-zA-Z0-9\]\[a-zA-Z0-9\._\+\-\]\{0,50\}/);
+  assert.match(workflow, /\[a-zA-Z0-9\]\[a-zA-Z0-9\._\+-\]\{0,50\}/);
   assert.match(workflow, /\{0,110\}\\\.apk/);
   assert.match(workflow, /1_900_000_000/);
   assert.match(workflow, /count != \(size \+ chunk_size - 1\) \/\/ chunk_size/);
