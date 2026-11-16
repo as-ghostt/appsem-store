@@ -32,4 +32,7 @@ test('APK assembler verifies every downloaded part and validates the final ZIP s
   assert.match(workflow, /'AndroidManifest\.xml' not in archive\.namelist\(\)/);
   assert.match(workflow, /archive\.testzip\(\) is not None/);
   assert.match(workflow, /gh release upload "\$APPSEM_TAG" "\$APPSEM_FILE"/);
+  assert.match(workflow, /final_asset = by_name\.get\(file_name\)/);
+  assert.match(workflow, /APPSEM_FINAL_EXISTS/);
+  assert.match(workflow, /env\.APPSEM_FINAL_EXISTS != '1'/);
 });
