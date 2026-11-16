@@ -35,6 +35,23 @@ jobs:
         run: npm audit --omit=dev --audit-level=critical
       - name: Validar protección de configuración de despliegue
         run: npm run check:metrics-env
+      - name: Confirmar Android SDK Build Tools para verificación APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          signer="$(command -v apksigner || true)"
+          if [ -z "$signer" ]; then
+            for root in "${ANDROID_HOME:-}" "${ANDROID_SDK_ROOT:-}" /usr/local/lib/android/sdk /opt/android-sdk; do
+              [ -n "$root" ] || continue
+              signer="$(find "$root/build-tools" -type f -name apksigner -print -quit 2>/dev/null || true)"
+              [ -n "$signer" ] && break
+            done
+          fi
+          if [ -z "$signer" ]; then
+            echo "::error::Android SDK Build Tools apksigner no está instalado en ubuntu-latest"
+            exit 1
+          fi
+          "$signer" version
       - name: Casos de integridad del backend
         run: npm run test:security
       - name: Comprobar ESLint
