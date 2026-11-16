@@ -25,10 +25,12 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import glob
           import json
           import os
           import re
           import shutil
+          import subprocess
           import sys
           import urllib.request
           import zipfile
@@ -114,6 +116,40 @@ jobs:
                   if archive.testzip() is not None:
                       raise ValueError('El APK contiene archivos ZIP dañados')
               os.rename(temp, file_name)
+          else:
+              # La ruta de recuperación también verifica el APK final existente.
+              with api(f'/repos/{repo}/releases/assets/{final_asset["id"]}', 'application/octet-stream') as response:
+                  if 'application/json' in response.headers.get('Content-Type', ''):
+                      raise ValueError('GitHub no devolvió los bytes del APK final')
+                  with open(file_name, 'wb') as output:
+                      shutil.copyfileobj(response, output, length=1024*1024)
+              if os.path.getsize(file_name) != size:
+                  raise ValueError('El APK final descargado no coincide con el tamaño declarado')
+          signer = shutil.which('apksigner')
+          if not signer:
+              sdk_roots = [
+                  os.environ.get('ANDROID_HOME', ''),
+                  os.environ.get('ANDROID_SDK_ROOT', ''),
+                  '/usr/local/lib/android/sdk',
+                  '/opt/android-sdk'
+              ]
+              candidates = []
+              for root in sdk_roots:
+                  if root:
+                      candidates.extend(glob.glob(os.path.join(root, 'build-tools', '*', 'apksigner')))
+              if candidates:
+                  signer = sorted(candidates, reverse=True)[0]
+          if not signer:
+              raise RuntimeError('Android SDK Build Tools apksigner no está disponible en el runner')
+          verification = subprocess.run(
+              [signer, 'verify', '--verbose', file_name],
+              check=True, capture_output=True, text=True, timeout=120
+          )
+          print('Firma APK verificada criptográficamente por apksigner.')
+          if verification.stdout:
+              print(verification.stdout)
+          if verification.stderr:
+              print(verification.stderr)
           with open('appsem-chunk-ids.txt', 'w') as ids:
               for index in range(count):
                   asset = by_name.get(f'appsem-part-{index:03}.bin')
