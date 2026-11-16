@@ -56,13 +56,13 @@ jobs:
           if not release.get('draft'):
               print('La release ya está publicada; salida idempotente.')
               with open(os.environ['GITHUB_ENV'], 'a') as env:
-                  env.write('APPSEM_SKIP=1\\n')
+                  env.write('APPSEM_SKIP=1\n')
               sys.exit(0)
-          marker = 'APPSEM_CHUNKED_V1\\n'
+          marker = 'APPSEM_CHUNKED_V1\n'
           body = release.get('body') or ''
           if not body.startswith(marker):
               raise ValueError('Release sin metadatos de subida Appsem')
-          meta = json.loads(body[len(marker):].split('\\n', 1)[0])
+          meta = json.loads(body[len(marker):].split('\n', 1)[0])
           file_name = meta.get('name', '')
           slug = meta.get('slug', '')
           version = meta.get('version', '')
@@ -72,7 +72,7 @@ jobs:
           if (meta.get('appsemUpload') != 1 or
               not re.fullmatch(r'[a-z0-9]+(?:-[a-z0-9]+)*', slug) or
               not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._+-]{0,50}', version) or
-              not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{0,110}\\.apk', file_name, re.I)):
+              not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9._-]{0,110}\.apk', file_name, re.I)):
               raise ValueError('Metadatos del APK incorrectos')
           if (not isinstance(size, int) or isinstance(size, bool) or
               not 0 < size <= 1_900_000_000 or not isinstance(count, int) or
